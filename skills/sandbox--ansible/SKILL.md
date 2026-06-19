@@ -7,6 +7,8 @@ description: >
   Invoquer avec /sandbox--ansible ou en demandant de "tester dans un sandbox ansible".
 
 **Note** : actions effectuées à l'intérieur du container lancé par ce skill sont autonomes — le skill peut modifier/itérer sur les fichiers copiés dans le container sans validation utilisateur. Les sorties des commandes sont affichées intégralement.
+
+**Comportement d'exécution** : le lancement du sandbox (`sandbox--ansible`) se fait en arrière-plan. Un agent effectue la copie, l'exécution et les itérations en tâche de fond; les logs et l'état d'avancement sont publiés dans `knowledge/sandbox-runs/<timestamp>/`.
 allowed-tools: shell
 ---
 

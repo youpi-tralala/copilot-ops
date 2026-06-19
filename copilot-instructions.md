@@ -39,6 +39,7 @@ Règles immédiates :
 - **Jamais auto-merge** — un humain valide toujours
 - **Validation des chemins** : utiliser `skills/guardrails/check-paths.sh` en cas de doute
 - **Toujours afficher la sortie des commandes** à l'écran — ne jamais rediriger vers `/dev/null` sans raison explicite
+- **Lancement du sandbox** : les exécutions de `sandbox--ansible` se font en arrière-plan par défaut. Un agent en arrière-plan effectue copie, exécution et itérations; les résultats sont consignés dans `knowledge/sandbox-runs/<timestamp>/`.
 
 ## Knowledge base
 
