@@ -22,15 +22,17 @@ Sources : [Green Software Foundation](https://principles.green) · [Green AI —
 ## 2. Choix du modèle
 
 > **Règle** : utiliser le modèle le plus léger suffisant pour la tâche.
+> Utiliser les modèles Anthropic (Haiku, Sonnet, Opus) de préférence.
+> 
 
 | Tâche | Modèle recommandé |
 |---|---|
-| Recherche, grep, lookup simple | Haiku / GPT-mini |
-| Rédaction, refactoring, explication | Sonnet / GPT-standard |
-| Architecture complexe, raisonnement multi-étapes | Opus / GPT-large |
+| Recherche, grep, lookup simple | Haiku |
+| Rédaction, refactoring, explication | Sonnet |
+| Architecture complexe, raisonnement multi-étapes | Opus |
 | Génération de code critique, sécurité | Sonnet minimum |
 
-- Ne pas escalader vers un modèle lourd sans raison technique.
+- Ne pas escalader vers un modèle lourd sans raison technique (ex: si un raisonnement multi-étapes est nécessaire, si un raisonnement est faux ou invalidé plusieurs fois).
 - Les sous-agents (`explore`, `task`) utilisent Haiku par défaut — ne pas forcer Sonnet sauf nécessité.
 
 ---

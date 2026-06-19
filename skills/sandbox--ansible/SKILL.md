@@ -1,10 +1,12 @@
 ---
-name: sandbox
+name: sandbox--ansible
 description: >
   Teste un playbook Ansible dans un container Docker éphémère sur code-vm,
   puis détruit le container. À utiliser quand on veut tester ou valider un
   playbook Ansible sans impacter un système réel.
-  Invoquer avec /sandbox ou en demandant de "tester dans un sandbox".
+  Invoquer avec /sandbox--ansible ou en demandant de "tester dans un sandbox ansible".
+
+**Note** : actions effectuées à l'intérieur du container lancé par ce skill sont autonomes — le skill peut modifier/itérer sur les fichiers copiés dans le container sans validation utilisateur. Les sorties des commandes sont affichées intégralement.
 allowed-tools: shell
 ---
 
@@ -21,7 +23,7 @@ Tester un playbook Ansible dans un container Docker éphémère sur la VM `code-
 ## Procédure
 
 1. Copier le répertoire du playbook à tester sur `code-vm` dans `/home/copilot/sandbox_<timestamp>/`
-2. Exécuter le script `sandbox.sh` de ce répertoire en passant le chemin du playbook en argument
+2. Exécuter le script `sandbox--ansible.sh` de ce répertoire en passant le chemin du playbook en argument
 3. Le script crée un container Docker Debian éphémère, prépare un inventory Ansible pointant vers ce container, exécute le playbook, rapporte les résultats, puis détruit le container
 4. Afficher clairement : succès/échec, tâches modifiées, erreurs éventuelles
 

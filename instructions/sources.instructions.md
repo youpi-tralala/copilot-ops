@@ -23,3 +23,9 @@ Si la réponse n'y figure pas, le préciser explicitement avant de répondre.
 | Python | https://docs.python.org |
 | Node.js | https://nodejs.org/en/docs |
 | GNU | https://www.gnu.org/ |
+
+## Autres sources
+
+| Site |
+|---|
+| https://dev.to/ |

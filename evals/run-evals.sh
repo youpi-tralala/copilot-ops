@@ -35,7 +35,7 @@ fi
 echo ""
 echo "[ Nominal / Edge — sandbox requis ]"
 if ssh -i "${HOME}/.ssh/copilot@code-vm" -o StrictHostKeyChecking=no -o ConnectTimeout=3 copilot@192.168.56.10 "docker info" >/dev/null 2>&1; then
-  # Sandbox accessible — lancer les playbooks (nécessite sandbox.sh opérationnel)
+  # Sandbox accessible — lancer les playbooks (nécessite sandbox--ansible.sh opérationnel)
   result "Nominal : install package (sandbox requis)" skip
   result "Edge : systemd dans container (limite connue)" skip
 else

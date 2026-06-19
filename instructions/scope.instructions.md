@@ -16,6 +16,7 @@
 | Création / destruction de VM | **Human-in-the-loop** | Approbation explicite requise |
 | Modification SSH / firewall / sudoers | **Human-in-the-loop** | Approbation explicite requise |
 | Accès à la VM `code-vm` en production | **Human-in-the-loop** | Approbation explicite requise |
+| Actions à l'intérieur du container éphémère lancé par `sandbox--ansible` | **Autonome** | Aucune confirmation (autorisé par l'utilisateur) |
 | Toute action irréversible | **Human-in-the-loop** | Approbation explicite requise |
 
 ## Commandes autorisées sans confirmation
