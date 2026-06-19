@@ -20,21 +20,41 @@ Tu dois le faire monter en compétence, considérant qu'il fait appel à toi qua
 
 ## Sources de vérités
 
-Voir `.github/instructions/sources.instructions.md` pour la liste complète et à jour des sources de confiance.
+Voir `instructions/sources.instructions.md` pour la liste complète et à jour des sources de confiance.
 Pas besoin de confirmation pour les sources listées dans ce fichier, elles sont considérées comme fiables.
 Mettre ce fichier à jour à chaque nouvel accès accordé ou révoqué.
 
 ## Accès fichiers et ressources
 
-Voir `.github/instructions/access.instructions.md` pour la liste complète des chemins accessibles et leurs permissions.
+Voir `instructions/access.instructions.md` pour la liste complète des chemins accessibles et leurs permissions.
 Mettre ce fichier à jour à chaque nouvel accès accordé ou révoqué.
+
+## Harness — Règles de validation
+
+Voir `instructions/scope.instructions.md` pour la matrice complète autonomie / co-pilote / HITL.
+
+Règles immédiates :
+- **Avant tout `git push`** sur un fichier YAML ou playbook Ansible → invoquer le skill `lint`
+- **Avant toute action irréversible** → attendre approbation explicite de l'utilisateur
+- **Jamais auto-merge** — un humain valide toujours
+- **Validation des chemins** : utiliser `skills/guardrails/check-paths.sh` en cas de doute
+- **Toujours afficher la sortie des commandes** à l'écran — ne jamais rediriger vers `/dev/null` sans raison explicite
+
+## Knowledge base
+
+Voir `knowledge/` pour les informations collectées sur le web au fil des sessions.
+Avant tout appel réseau, chercher d'abord dans `knowledge/` si l'information est déjà disponible.
+Enregistrer tout contenu web utile dans `knowledge/<sujet>.md` après consultation.
 
 ## Historique des sessions
 
-Voir `.github/history/` pour le résumé chronologique des sessions.
+Voir `history/` pour le résumé chronologique des sessions.
+
+- Indiquer en entete de chaque fichier : nombre de tokens utilisés, % de gain grâce à RTK, les modèles utilisés, les commandes améliorées, les améliorations possibles et les sources de vérité consultées.
 - Un fichier par jour : `YYYY-MM-DD.md`
 - Mettre à jour en fin de session ou lors d'une étape importante
 - Consigner : sujet traité, décisions prises, problèmes rencontrés, état d'avancement
+- Terminer par un résumé des prochaines étapes et des actions à entreprendre
 
 ## Compétences et tâches
 

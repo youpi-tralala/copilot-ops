@@ -1,0 +1,12 @@
+---
+# Eval edge : tâche systemd dans container
+# Résultat attendu : échec ou warning — limite connue du sandbox (pas d'init)
+- name: Eval edge — systemd
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Démarrer un service (attendu : échec dans container sans init)
+      ansible.builtin.service:
+        name: ssh
+        state: started
+      ignore_errors: true  # on documente la limite, pas un bug

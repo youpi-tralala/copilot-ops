@@ -1,0 +1,11 @@
+---
+# Eval nominal : installation d'un package
+# Doit passer sans erreur dans le sandbox
+- name: Eval nominal
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Installer curl
+      ansible.builtin.package:
+        name: curl
+        state: present

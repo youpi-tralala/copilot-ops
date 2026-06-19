@@ -15,7 +15,7 @@ Sources : [Green Software Foundation](https://principles.green) · [Green AI —
 - **RTK obligatoire** pour les sorties CLI (voir `rtk.instructions.md`).
 - **Pas de répétition** : ne pas reformuler une réponse déjà donnée dans la même session.
 - **Pas de remplissage** : pas d'introduction, de conclusion ou de flagornerie.
-- **Réutiliser l'historique** : lire `.github/history/` avant de redemander un contexte déjà établi.
+- **Réutiliser l'historique** : lire `history/` avant de redemander un contexte déjà établi.
 
 ---
 
@@ -54,10 +54,22 @@ Sources : [Green Software Foundation](https://principles.green) · [Green AI —
 
 ---
 
-## 5. Comportement général
+## 6. Optimisations RTK identifiées en session
+
+> Améliorations détectées via `rtk gain --history`. Mettre à jour au fil des sessions.
+
+| Commande | Problème | Correction |
+|---|---|---|
+| `rtk read <file>` | 0% de gain — RTK ne filtre pas les lectures | Utiliser l'outil natif `view` à la place |
+| `rtk gh repo view` | 0% — sortie JSON déjà compacte | Utiliser `gh ... \| jq` directement |
+| `grep` sans préfixe | Pas filtré par RTK | Systématiser `rtk grep` pour toute recherche de contenu |
+| `>/dev/null` ou `2>/dev/null` | Masque la sortie — perd le gain RTK | Ne rediriger vers null que si la sortie est vraiment inutile |
+
+**Règle** : après chaque session, lancer `rtk gain --history` et mettre à jour ce tableau si de nouveaux patterns apparaissent.
+
 
 - **LLM en dernier recours** : si une commande shell, un `grep` ou une lecture de fichier suffit, ne pas solliciter le modèle.
 - **Sessions courtes et ciblées** : une session = un objectif. Éviter les sessions longues qui accumulent du contexte inutile.
 - **Pas de plan pour les tâches simples** : créer un plan uniquement si la tâche implique plusieurs fichiers ou phases.
-- **Fin de session propre** : mettre à jour `.github/history/YYYY-MM-DD.md` avant de clore.
+- **Fin de session propre** : mettre à jour `history/YYYY-MM-DD.md` avant de clore.
 - **Transparence** : signaler à l'utilisateur si une tâche peut être accomplie sans IA.
