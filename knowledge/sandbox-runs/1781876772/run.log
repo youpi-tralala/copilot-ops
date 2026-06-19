@@ -1,0 +1,110 @@
+
+PLAY [Hardening servers] *******************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Populate service facts] ********************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Packages - Update repos (DEBIAN/UBUNTU)] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Packages - Install packages (DEBIAN/UBUNTU)] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Packages - Update repos (RHEL/CENTOS)] *****
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Packages - Install packages (RHEL/CENTOS)] ***
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - update OpenSSH (DEBIAN/UBUNTU)] ******
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - update OpenSSH (RHEL/CENTOS)] ********
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - Configure sshd_config] ***************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - configure ssh_config] ****************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - create sshusers group] ***************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - add operis and rdadmin to sshuser group] ***
+ok: [localhost] => (item=operis)
+ok: [localhost] => (item=rdadmin)
+ok: [localhost] => (item=root)
+
+TASK [ansible-role-harden-servers : SSH - gather service facts] ****************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : SSH - reload services if present] **********
+changed: [localhost] => (item=ssh)
+skipping: [localhost] => (item=sshd) 
+
+TASK [ansible-role-harden-servers : Polyinstantiation - enable polyinstantiation (RHEL/CENTOS) - copy script] ***
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Polyinstantiation - enable polyinstantiation (RHEL/CENTOS) - run script] ***
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Postfix - deactivate VRFY command] *********
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Postfix - hide smtp banner] ****************
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Postfix - reload postfix if present] *******
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (login.defs) Restrict umask] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Postgres) Find PostgreSQL services] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Postgres) Build all configuration directory paths] ***
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Postgres) Display configuration directories] ***
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Postgres) Set permissions on configuration files] ***
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Home directories) Retrieve interactive users] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Home directories) Filter users with /home directory] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Permissions - (Home directories) Check which home directories exist] ***
+ok: [localhost] => (item=operis)
+ok: [localhost] => (item=rdadmin)
+
+TASK [ansible-role-harden-servers : Permissions - (Home directories) Set permissions only on existing home directories] ***
+ok: [localhost] => (item=/home/operis)
+ok: [localhost] => (item=/home/rdadmin)
+
+TASK [ansible-role-harden-servers : AUTH - Update password policy] *************
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : AUTH - Update password policy] *************
+skipping: [localhost]
+
+TASK [ansible-role-harden-servers : Various - (Devices) Ensure /etc/modprobe.d exists] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Various - (Devices) Create modprobe rule to block usb-storage] ***
+ok: [localhost]
+
+TASK [ansible-role-harden-servers : Various - (Devices) Create modprobe rule to block firewire-storage] ***
+ok: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=21   changed=1    unreachable=0    failed=0    skipped=12   rescued=0    ignored=0   
+
