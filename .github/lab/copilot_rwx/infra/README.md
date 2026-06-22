@@ -7,7 +7,7 @@ Prereqs:
 
 Quickstart:
 
-cd /home/yves/ops/my_git/copilot-ops/.github/lab/copilot_rwx/infra
+cd /home/yves/ops/my_git/copilot-ops/.github/copilot_rwx/infra
 export TF_VAR_ssh_public_key_path="/home/yves/.ssh/yves@onepoint.pub"    # adjust if different
 export TF_VAR_git_repo="https://github.com/youpi-tralala/myownpersonaljesus"
 # optionally export TF_VAR_resource_group_name and TF_VAR_location
@@ -15,7 +15,7 @@ export TF_VAR_git_repo="https://github.com/youpi-tralala/myownpersonaljesus"
 rtk terraform init
 rtk terraform apply -var="ssh_public_key_path=/home/yves/.ssh/yves@onepoint.pub" -auto-approve
 
-# Note: the repo layout may place lab/copilot_rwx under .github/lab/; cloud-init will try both ./lab/... and ./.github/lab/... when cloning the repository.
+# Note: the repo layout may place copilot_rwx at the repo root or under .github/; cloud-init will try both ./copilot_rwx and ./.github/copilot_rwx when cloning the repository.
 
 Notes:
 - Provider uses Azure CLI credentials (run: az login)
