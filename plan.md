@@ -181,3 +181,108 @@ Prochaines actions recommandées :
 3. Automatiser les tests E2E (Playwright) si besoin pour remonter le niveau de confiance
 
 Si tu veux, je finalise le rapport consolidé (1 page) et ferme le plan ; sinon on passe au nouveau sujet.
+
+---
+
+# Nouveau plan — Agent IA local (serveur 32GB RAM DDR3 + i5)
+
+## Contexte
+Le serveur disponible : CPU i5 (sans GPU), 32 GB RAM (DDR3). Objectif : déployer un agent IA en local, sans abonnement cloud, pour usages mixtes (chat, RAG local, automatisation).
+
+## Contraintes matérielles
+- Pas de GPU → privilégier modèles quantifiés et frameworks CPU-friendly (llama.cpp / ggml / gguf). 7B est réaliste ; 13B probable mais lent et fragile en RAM.
+- 32GB RAM permet un modèle 7B quantifié en 4-bit (GGML/GGUF) et une instance d'embeddings + vectordb.
+
+## Recommandation rapide (choix principal)
+- Modèle LLM : Llama 2 / Mistral 7B quantifié en GGUF (4-bit) via llama.cpp / llama-cpp-python. Raison : bonne qualité, fonctionnement CPU, licences Hugging Face.
+- Serveur d'inférence : llama.cpp (native C++) ou llama-cpp-python + FastAPI wrapper pour intégration Python.
+- UI / orchestration optionnelle : Text-generation-webui (si besoin d'interface) ou un petit service FastAPI.
+- Embeddings & RAG : sentence-transformers (all-MiniLM-L6-v2) + FAISS (CPU) pour recherche vecteur locale.
+- Orchestration & isolation : Docker Compose + systemd service pour démarrage automatique.
+
+## Plan d'implémentation (phases)
+1. Préparation OS & dépendances
+   - Installer docker, python3-venv, build-essential, cmake, git
+2. Choix modèle & téléchargement
+   - Télécharger Llama2-7B (ou Mistral-7B) depuis Hugging Face (vérifier licence)
+   - Convertir en GGUF/ggml si nécessaire (ou récupérer déjà converti)
+3. Déploiement runtime
+   - Installer llama.cpp et llama-cpp-python
+   - Démarrer un service FastAPI minimal wrapping llama-cpp-python
+4. Embeddings + RAG
+   - Installer sentence-transformers, créer index FAISS local
+   - Indexer documents (docs internes) dans /var/ai-data/vecstore
+5. Orchestration & sécurité
+   - Dockerfile / docker-compose.yml pour isoler composants
+   - systemd unit pour démarrer le service local au boot
+   - Firewall: n'écouter que localhost par défaut; exposer via reverse-proxy si besoin
+6. Tests & validations
+   - Cas d'usage : chat, requête RAG, exécution d'un script (sandboxed)
+   - Mesures : latence, peak RAM, taux réussite réponses
+7. Documentation & knowledge
+   - Documenter commandes, scripts, endpoints, limitations dans knowledge/
+
+## Artéfacts à créer
+- scripts/install-deps.sh
+- models/download-and-convert.sh
+- services/llama-cpp-fastapi/ (FastAPI wrapper)
+- services/rag/index_documents.py (indexation + ingestion)
+- docker-compose.yml
+- systemd units (optional)
+
+## Commandes clés (exemples)
+- Installer dependencies:
+  sudo apt update && sudo apt install -y docker.io python3-venv build-essential cmake git
+- Télécharger modèle (ex):
+  git lfs clone <hf-model-repo> && python convert_to_gguf.py --model <...>
+- Lancer FastAPI:
+  python -m venv .venv && .venv/bin/pip install -r requirements.txt && uvicorn app:app --host 127.0.0.1 --port 8080
+
+## Limitations & risques
+- Qualité vs latence : quantification réduit mémoire mais peut dégrader qualité de raisonnement.
+- Pas de GPU : temps de réponse important (>1-5s pour 7B) selon CPU
+- Licences modèles : vérifier usage commercial / restrictions
+- Sécurité : exposer uniquement localhost sans reverse-proxy auth
+
+## Alternatives si tu veux plus de qualité
+- Si GPU disponible (future upgrade) → vLLM / Mistral 7B/13B sur GPU
+- Utiliser services locaux comme Ollama (si compatibles) pour gestion modèle plus simple
+
+## Prochaines étapes proposées (exécutables)
+1. Valider que le serveur est sous Debian/Ubuntu (ou préciser OS)
+2. Autoriser le téléchargement de modèles (HF token si requis)
+3. Lancer la phase 1 (installation) — je fournis scripts prêts à exécuter
+
+
+## Validation utilisateur & emplacement d'implémentation
+L'utilisateur a approuvé le plan et demande l'exécution en mode "autopilot" dans l'environnement lab/copilot_rwx (chemin autorisé : /home/yves/ops/lab/copilot_rwx/). Toutes les actions d'installation et de déploiement se feront dans ce répertoire — création d'un sous-dossier `local-agent/` pour contenir scripts, Dockerfiles et fichiers de configuration.
+
+Notes opérationnelles :
+- Le compte `copilot` possède les droits nécessaires sur lab/copilot_rwx.
+- Les scripts créeront des artefacts sous `/home/yves/ops/lab/copilot_rwx/local-agent/` et enregistreront logs et index FAISS dans `/home/yves/ops/lab/copilot_rwx/local-agent/data/`.
+- Les étapes automatisées incluent checks de sécurité (écoute sur localhost uniquement) et sauvegarde des fichiers de configuration dans `knowledge/`.
+
+Si tu confirmes, passer en exécution autopilot pour déployer l'agent dans lab/copilot_rwx.
+
+## Progression actuelle — 2026-06-19T16:24:34+02:00
+Scaffolding créé sous /home/yves/ops/lab/copilot_rwx/local-agent/ (sans exécution). Fichiers notables générés :
+- install-deps.sh
+- models/download-and-convert.sh
+- services/llama-cpp-fastapi/{app.py,requirements.txt,Dockerfile,index_documents.py,README.md}
+- docker-compose.yml
+- .env.example
+- scripts/{prepare-venv.sh,index-and-run.sh,build-image.sh}
+- local-llm.service (systemd unit example)
+- knowledge/local-agent-setup.md
+
+Prochaines étapes (manuelles à exécuter sur le serveur) :
+1. Copier l'arborescence sur le serveur cible
+2. bash install-deps.sh
+3. Placer le modèle quantifié en ./data/model/model.gguf
+4. Option A (venv): scripts/prepare-venv.sh && LLAMA_MODEL_PATH=../../data/model/model.gguf .venv/bin/uvicorn app:app --host 127.0.0.1 --port 8080
+   Option B (docker): rtk docker compose up --build
+5. Indexer les documents si besoin: services/llama-cpp-fastapi/index_documents.py --docs-dir ./data/docs --index-out ./data/vec_index.faiss --meta-out ./data/vec_meta.json
+
+Notes de sécurité : service écoute localhost par défaut; vérifier licences HF; mesurer peak RAM à la première exécution.
+
+
