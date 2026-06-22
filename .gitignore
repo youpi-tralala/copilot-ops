@@ -1,0 +1,3 @@
+.github/lab/copilot_rwx/**/.terraform/
+.github/lab/copilot_rwx/**/terraform.tfstate*
+.github/lab/copilot_rwx/**/.terraform.lock.hcl
