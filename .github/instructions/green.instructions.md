@@ -1,77 +1,82 @@
 # Bonnes pratiques Green AI
 
-Objectif : minimiser l'empreinte environnementale de chaque interaction IA
-(tokens, réseau, compute, choix de modèle).
-Périmètre : toute utilisation d'IA — Copilot CLI, Claude, ChatGPT, GitHub Copilot.
+Objectif : réduire l'empreinte environnementale des développements et des interactions IA (tokens, réseau, compute, choix de modèles). S'applique au travail local, aux playbooks, CI/CD et aux agents.
 
-Sources : [Green Software Foundation](https://principles.green) · [Green AI — Schwartz et al.](https://arxiv.org/abs/1907.10597)
+Sources : Green Software Foundation · Green AI (Schwartz et al.) · greencoding.agent.md (référence interne)
 
 ---
 
-## 1. Tokens
+## Principes clés (résumé)
 
-- **Prompts concis** : chaque token non nécessaire consomme du compute et de l'énergie.
-- **Pas de contexte inutile** : n'inclure que ce qui est pertinent pour la tâche en cours.
-- **RTK obligatoire** pour les sorties CLI (voir `rtk.instructions.md`).
-- **Pas de répétition** : ne pas reformuler une réponse déjà donnée dans la même session.
-- **Pas de remplissage** : pas d'introduction, de conclusion ou de flagornerie.
-- **Réutiliser l'historique** : lire `history/` avant de redemander un contexte déjà établi.
-
----
-
-## 2. Choix du modèle
-
-> **Règle** : utiliser le modèle le plus léger suffisant pour la tâche.
-> Utiliser les modèles Anthropic (Haiku, Sonnet, Opus) de préférence.
-> 
-
-| Tâche | Modèle recommandé |
-|---|---|
-| Recherche, grep, lookup simple | Haiku |
-| Rédaction, refactoring, explication | Sonnet |
-| Architecture complexe, raisonnement multi-étapes | Opus |
-| Génération de code critique, sécurité | Sonnet minimum |
-
-- Ne pas escalader vers un modèle lourd sans raison technique (ex: si un raisonnement multi-étapes est nécessaire, si un raisonnement est faux ou invalidé plusieurs fois).
-- Les sous-agents (`explore`, `task`) utilisent Haiku par défaut — ne pas forcer Sonnet sauf nécessité.
+- Mesurer avant d'optimiser : profiler et collecter métriques (CPU, mémoire, I/O, réseau, SCI si possible).
+- Prioriser les changements par impact mesurable (gain SCI vs coût de maintenance).
+- Tester toute modification critique en sandbox (`sandbox--ansible`) avant push.
+- Favoriser les optimisations d'architecture (batching, cache, pagination) avant micro‑optimisations.
+- Préserver lisibilité et sécurité : ne pas sacrifier compréhension ou sécurité pour un gain minime.
 
 ---
 
-## 3. Réseau
+## 1. Tokens et prompts
 
-- **Batching** : regrouper les appels API quand plusieurs opérations peuvent être traitées ensemble.
-- **Pas d'appel redondant** : ne pas envoyer deux fois la même requête si une réponse cache est disponible.
-- **Téléchargements** : utiliser `rtk wget` ou `rtk curl` pour comprimer les sorties.
-- **Limiter les web_search** : chercher d'abord dans les sources locales (`grep`, `view`) avant de faire un appel réseau.
-
----
-
-## 4. Compute / CPU
-
-- **Évaluer avant d'agir** : un `grep` ou un `view` consomme infiniment moins qu'un appel LLM.
-- **Pas de retry infini** : si une approche échoue deux fois, proposer une alternative plutôt que de boucler.
-- **Sous-agents parcimonieux** : ne déléguer à un agent (`task`, `explore`) que si la tâche est genuinement complexe et multi-étapes.
-- **Pas de background inutile** : n'utiliser `mode: background` que s'il y a un vrai travail parallèle à faire.
-- **Arrêter les processus** : tuer les processus de test dès qu'ils ont rempli leur rôle.
+- Prompts concis et ciblés. Éviter d'envoyer l'historique complet inutilement.
+- Réutiliser `history/` et `knowledge/` pour contexte local.
+- RTK obligatoire pour commandes CLI sortant beaucoup de texte (voir `rtk.instructions.md`).
+- LLM en dernier recours : préférez grep/view/outil local.
 
 ---
 
-## 6. Optimisations RTK identifiées en session
+## 2. Modèles et coût compute
 
-> Améliorations détectées via `rtk gain --history`. Mettre à jour au fil des sessions.
+- Utiliser le modèle le plus léger suffisant pour la tâche (ex: Haiku pour recherches, Sonnet pour refactorings).
+- Éviter d'itérer inutilement contre un modèle coûteux.
+- Documenter choix de modèle et justification dans les PRs quand impact significatif.
 
-| Commande | Problème | Correction |
-|---|---|---|
-| `rtk read <file>` | 0% de gain — RTK ne filtre pas les lectures | Utiliser l'outil natif `view` à la place |
-| `rtk gh repo view` | 0% — sortie JSON déjà compacte | Utiliser `gh ... \| jq` directement |
-| `grep` sans préfixe | Pas filtré par RTK | Systématiser `rtk grep` pour toute recherche de contenu |
-| `>/dev/null` ou `2>/dev/null` | Masque la sortie — perd le gain RTK | Ne rediriger vers null que si la sortie est vraiment inutile |
+---
 
-**Règle** : après chaque session, lancer `rtk gain --history` et mettre à jour ce tableau si de nouveaux patterns apparaissent.
+## 3. Réseau et données
 
+- Grouper requêtes (batching) et compresser payloads.
+- Préférer formats efficaces (protobuf/msgpack) si applicable.
+- Limiter téléchargements et appels externes en localisant informations dans `knowledge/`.
 
-- **LLM en dernier recours** : si une commande shell, un `grep` ou une lecture de fichier suffit, ne pas solliciter le modèle.
-- **Sessions courtes et ciblées** : une session = un objectif. Éviter les sessions longues qui accumulent du contexte inutile.
-- **Pas de plan pour les tâches simples** : créer un plan uniquement si la tâche implique plusieurs fichiers ou phases.
-- **Fin de session propre** : mettre à jour `history/YYYY-MM-DD.md` avant de clore.
-- **Transparence** : signaler à l'utilisateur si une tâche peut être accomplie sans IA.
+---
+
+## 4. Code & infra : stratégie d'optimisation
+
+1. Profile (py-spy, perf, pprof, flamegraphs) → identifier hotspots.
+2. Analyser fréquence d'exécution et criticité (scale vs batch).
+3. Proposer alternatives (algorithme, cache, pagination, dénormalisation, right‑sizing infra).
+4. Implémenter tests et mesurer avant/après (temps, mémoire, SCI approximé).
+5. Rédiger justification et instructions de rollback dans la PR.
+
+Anti‑patterns prioritaires à corriger : busy‑wait, N+1 queries, chargement de datasets complets, copies profondes inutiles, blocking I/O sur chemins critiques.
+
+---
+
+## 5. KPI & suivi
+
+Mesurer et suivre : SCI (si possible), énergie par transaction (mWh), CPU utile vs overhead, mémoire max, débit/latence, bytes transférés.
+Ajouter métriques dans observability (Grafana/Prometheus) quand pertinent.
+
+---
+
+## 6. Sandbox & CI rules (intégration avec `sandbox--ansible`)
+
+- Tout playbook ou changement infra doit être testé via `sandbox--ansible` avant push.
+- Les modifications de playbooks / YAML : lint + sandbox run obligatoires (voir `skills/Ansible Lint Skill`).
+- Les runs sandbox produisent des dossiers `knowledge/sandbox-runs/<timestamp>/` — lier ces artefacts à la PR.
+
+---
+
+## Checklist rapide (avant push)
+
+- [ ] Profiling initial effectué
+- [ ] Gain estimé et justification documentés
+- [ ] Tests unitaires/integrations verts
+- [ ] Sandbox run OK (logs + artefacts attachés)
+- [ ] CI léger (batching/limits) activé si nécessaire
+- [ ] PR documente métriques before/after
+
+---
+
+Notes : conserver ce fichier à jour avec `rtk gain --history` et la FAQ interne `greencoding.agent.md`. Pour tout doute sur priorisation, demander une revue ciblée (HITL) avant changement irréversible.
