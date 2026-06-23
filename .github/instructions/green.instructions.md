@@ -98,4 +98,18 @@ Intégration CI / services : injecter les variables d'environnement ci‑dessus 
 
 Rapports : inclure la sortie de `/stats` dans les rapports quotidiens (`.github/history/YYYY-MM-DD.md`) sous la clé `headroom_stats`.
 
+### Parsing des stats
+
+- La sortie JSON de `/stats` doit être parsée avec `jk` pour formatage et extraction des champs avant insertion dans les rapports.
+- Si `jk` absent, utiliser `jq` en fallback.
+
+Exemples :
+
+- `rtk curl -sS http://localhost:8787/stats | jk`  # pretty-print / filtrage avec jk
+- fallback : `rtk curl -sS http://localhost:8787/stats | jq '.'`
+
+- Pour extraire uniquement tokens_saved avec jk (ou jq) :
+  - `rtk curl -sS http://localhost:8787/stats | jk`  # afficher puis copier le champ nécessaire
+  - `rtk curl -sS http://localhost:8787/stats | jq '.tokens.saved'`  # si jq utilisé
+
 
