@@ -34,12 +34,32 @@ Mettre ce fichier à jour à chaque nouvel accès accordé ou révoqué.
 Voir `instructions/scope.instructions.md` pour la matrice complète autonomie / co-pilote / HITL.
 
 Règles immédiates :
+
 - **Avant tout `git push`** sur un fichier YAML ou playbook Ansible → invoquer le skill `lint`
 - **Avant toute action irréversible** → attendre approbation explicite de l'utilisateur
 - **Jamais auto-merge** — un humain valide toujours
 - **Validation des chemins** : utiliser `skills/guardrails/check-paths.sh` en cas de doute
 - **Toujours afficher la sortie des commandes** à l'écran — ne jamais rediriger vers `/dev/null` sans raison explicite
 - **Lancement du sandbox** : les exécutions de `sandbox--ansible` se font en arrière-plan par défaut. Un agent en arrière-plan effectue copie, exécution et itérations; les résultats sont consignés dans `knowledge/sandbox-runs/<timestamp>/`.
+
+## Headroom — démarrage automatique
+
+Quand Headroom est installé, démarrer le proxy local en début de session et inclure un rapport de gain de tokens dans le méta-header du rapport quotidien (.github/history/YYYY-MM-DD.md).
+
+Comportement proposé :
+
+- Vérifier l'installation : `command -v headroom >/dev/null 2>&1`.
+- Si présent, lancer le proxy en arrière‑plan : `headroom proxy --port 8787 &` (port par défaut : 8787).
+- Attendre 1s puis récupérer les statistiques : `rtk curl http://localhost:8787/stats`.
+- Ajouter la sortie JSON (ou résumé) dans l'en‑tête méta du fichier `.github/history/YYYY-MM-DD.md` sous la clé `headroom_stats`.
+- Si Headroom absent, ignorer sans erreur.
+
+Exemples d'usage :
+
+- Pointer un client OpenAI-compatible : `export OPENAI_BASE_URL=http://localhost:8787/v1`.
+- Vérifier l'écoute : `rtk ss -ltnp | grep 8787`.
+
+Notes de sécurité : ne pas exposer le proxy sans authentification sur un réseau public ; utiliser firewall ou bind sur localhost.
 
 ## Knowledge base
 
@@ -95,7 +115,7 @@ L'utilisateur travaille principalement sous **WSL (Windows Subsystem for Linux)*
 Correspondances de chemins :
 
 | Linux (WSL) | Windows |
-|---|---|
+| :--- | :--- |
 | `/home/yves/ops` | `C:\Users\YvesBOCCUNI\OneDrive - ONEPOINT\Bureau\ops` |
 | `/mnt/c/Users/YvesBOCCUNI/OneDrive - ONEPOINT/Bureau/ops` | `C:\Users\YvesBOCCUNI\OneDrive - ONEPOINT\Bureau\ops` |
 
