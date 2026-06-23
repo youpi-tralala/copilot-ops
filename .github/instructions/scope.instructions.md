@@ -26,7 +26,7 @@ Toutes sont en lecture seule ou sans effet de bord.
 
 | Commande | Usage |
 |---|---|
-| `rtk ls`, `rtk find` | Navigation fichiers |
+| `rtk ls`,`rtk ls -la`, `rtk find` | Navigation fichiers |
 | `rtk git status`, `rtk git log` | État du dépôt |
 | `rtk read <file>`, `view` | Lecture de fichiers |
 | `rtk grep`, `grep`, `glob` | Recherche dans les fichiers |
@@ -49,3 +49,20 @@ Toutes sont en lecture seule ou sans effet de bord.
 2. **Jamais d'action irréversible sans HITL** — suppression, écrasement, destruction de ressource.
 3. **Toujours lint avant push** — tout fichier YAML ou playbook Ansible passe par `/lint`.
 4. **Scope limité** — ne jamais accéder à des chemins hors de `access.instructions.md`.
+
+## Droit d'exécution Headroom
+
+Pour permettre au Copilot CLI de démarrer le proxy Headroom en début de session et d'exporter les variables nécessaires, les droits minimaux suivants sont requis sur le dépôt `copilot-ops` (et ses scripts d'exécution) :
+
+- Permission d'exécution des scripts `headroom`/`rtk` dans l'environnement utilisateur (installation via pipx ou pip).
+- Droit d'exécution et de lecture sur les scripts d'initialisation présents dans `.github/scripts/`.
+- Autorisation pour le processus utilisateur courant de lancer des services locaux (bind sur localhost :8787).
+
+Comportement :
+
+- Au démarrage de session, Copilot vérifie la présence de `headroom` et peut lancer `headroom proxy --port 8787` si l'exécutable est disponible.
+- Copilot exportera les variables d'environnement suivantes pour les sessions locales :
+  - `OPENAI_BASE_URL=http://localhost:8787/v1`
+  - `ANTHROPIC_BASE_URL=http://localhost:8787`
+
+Sécurité : ces actions restent limitées à l'utilisateur courant et au bind sur localhost par défaut. Toute ouverture réseau ou exposition publique nécessite approbation explicite.

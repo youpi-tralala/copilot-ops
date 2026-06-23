@@ -80,3 +80,22 @@ Ajouter métriques dans observability (Grafana/Prometheus) quand pertinent.
 ---
 
 Notes : conserver ce fichier à jour avec `rtk gain --history` et la FAQ interne `greencoding.agent.md`. Pour tout doute sur priorisation, demander une revue ciblée (HITL) avant changement irréversible.
+
+---
+
+## Headroom Proxy
+
+Headroom peut réduire considérablement la consommation de tokens pour les appels LLM. Recommandations :
+
+- Démarrer le proxy localement pour les environnements de développement : `headroom proxy --port 8787`.
+- Pointer les clients vers le proxy :
+  - OpenAI-compatible clients : `export OPENAI_BASE_URL=http://localhost:8787/v1`
+  - Anthropic/Claude : `export ANTHROPIC_BASE_URL=http://localhost:8787`
+- Vérifier les statistiques : `rtk curl http://localhost:8787/stats`.
+- Sécuriser l'accès : bind sur localhost ou utiliser firewall / reverse proxy avec auth si exposé.
+
+Intégration CI / services : injecter les variables d'environnement ci‑dessus dans les services (docker-compose, systemd unit, containers) pour forcer le routage via Headroom.
+
+Rapports : inclure la sortie de `/stats` dans les rapports quotidiens (`.github/history/YYYY-MM-DD.md`) sous la clé `headroom_stats`.
+
+
