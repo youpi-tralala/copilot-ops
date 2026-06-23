@@ -42,17 +42,24 @@ Règles immédiates :
 - **Toujours afficher la sortie des commandes** à l'écran — ne jamais rediriger vers `/dev/null` sans raison explicite
 - **Lancement du sandbox** : les exécutions de `sandbox--ansible` se font en arrière-plan par défaut. Un agent en arrière-plan effectue copie, exécution et itérations; les résultats sont consignés dans `knowledge/sandbox-runs/<timestamp>/`.
 
-## Headroom — configuration
+## Headroom — démarrage automatique
 
-La configuration et les recommandations d'utilisation du proxy Headroom ont été déplacées vers `.github/instructions/green.instructions.md` (section "Headroom Proxy").
+Quand Headroom est installé, démarrer le proxy local en début de session et inclure un rapport de gain de tokens dans le méta-header du rapport quotidien (.github/history/YYYY-MM-DD.md).
 
-Important : lors de la récupération des statistiques Headroom, la sortie JSON doit être parsée avec l'outil `jq` avant tout affichage ou insertion dans les fichiers de rapport.
+Comportement proposé :
 
-Exemple d'usage :
+- Vérifier l'installation : `command -v headroom >/dev/null 2>&1`.
+- Si présent, lancer le proxy en arrière‑plan : `headroom proxy --port 8787 &` (port par défaut : 8787).
+- Attendre 1s puis récupérer les statistiques : `rtk curl http://localhost:8787/stats`.
+- Ajouter la sortie JSON (ou résumé) dans l'en‑tête méta du fichier `.github/history/YYYY-MM-DD.md` sous la clé `headroom_stats`.
+- Si Headroom absent, l'indiquer et continuer sans erreur.
 
-- `rtk curl -sS http://localhost:8787/stats | jq '.'`  # pretty-print / filtrage avec jq
+Exemples d'usage :
 
-Le Copilot CLI doit automatiquement utiliser `jq` pour formater et extraire les champs pertinents (ex: tokens.saved, proxy_inbound) lorsqu'il met à jour `.github/history/YYYY-MM-DD.md`.
+- Pointer un client OpenAI-compatible : `export OPENAI_BASE_URL=http://localhost:8787/v1`.
+- Vérifier l'écoute : `rtk ss -ltnp | grep 8787`.
+
+Notes de sécurité : ne pas exposer le proxy sans authentification sur un réseau public ; utiliser firewall ou bind sur localhost.
 
 ## Knowledge base
 

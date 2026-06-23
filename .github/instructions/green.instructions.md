@@ -98,6 +98,12 @@ Intégration CI / services : injecter les variables d'environnement ci‑dessus 
 
 Rapports : inclure la sortie de `/stats` dans les rapports quotidiens (`.github/history/YYYY-MM-DD.md`) sous la clé `headroom_stats`.
 
+### Affichage human‑readable
+
+- Le contenu inséré dans les fichiers `history` doit être lisible par un humain : ajouter un résumé en texte clair (tokens saved, demandes total, requêtes proxy) et conserver le JSON détaillé dans un fichier compagnon (`YYYY-MM-DD.headroom.json`).
+- Exemple de résumé à insérer (format libre mais clair) :
+  Headroom — tokens_saved: 123, requests_total: 10, proxy_inbound_total: 8 (updated: 2026-06-23T14:00:00Z)
+
 ### Parsing des stats
 
 - La sortie JSON de `/stats` doit être parsée avec `jq` pour formatage et extraction des champs avant insertion dans les rapports.
@@ -108,5 +114,19 @@ Exemples :
 
 - Pour extraire uniquement tokens_saved :
   - `rtk curl -sS http://localhost:8787/stats | jq '.tokens.saved'`
+
+### Mise à jour périodique (opérationnelle)
+
+- Un processus d'actualisation peut être lancé en arrière‑plan pendant une session pour :
+  - écrire le résumé human‑readable et le JSON détaillé dans `.github/history/` plusieurs fois par session (intervalle configurable, ex: 5 minutes),
+  - consigner chaque exécution dans `knowledge/headroom_updates.log`,
+  - enregistrer un état sommaire dans `.github/instructions/_generated_updates.md`.
+
+- Le script d'updater doit :
+  - vérifier la présence de `headroom` et `jq`,
+  - récupérer `/stats`, parser avec `jq`, écrire `YYYY-MM-DD.headroom.json` et `YYYY-MM-DD.headroom.txt` (résumé),
+  - ajouter une ligne horodatée dans `knowledge/headroom_updates.log`.
+
+- Toute exposition réseau (liaison non‑localhost) nécessite approbation explicite.
 
 
