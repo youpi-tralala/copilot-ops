@@ -100,16 +100,13 @@ Rapports : inclure la sortie de `/stats` dans les rapports quotidiens (`.github/
 
 ### Parsing des stats
 
-- La sortie JSON de `/stats` doit être parsée avec `jk` pour formatage et extraction des champs avant insertion dans les rapports.
-- Si `jk` absent, utiliser `jq` en fallback.
+- La sortie JSON de `/stats` doit être parsée avec `jq` pour formatage et extraction des champs avant insertion dans les rapports.
 
 Exemples :
 
-- `rtk curl -sS http://localhost:8787/stats | jk`  # pretty-print / filtrage avec jk
-- fallback : `rtk curl -sS http://localhost:8787/stats | jq '.'`
+- `rtk curl -sS http://localhost:8787/stats | jq '.'`  # pretty-print / filtrage avec jq
 
-- Pour extraire uniquement tokens_saved avec jk (ou jq) :
-  - `rtk curl -sS http://localhost:8787/stats | jk`  # afficher puis copier le champ nécessaire
-  - `rtk curl -sS http://localhost:8787/stats | jq '.tokens.saved'`  # si jq utilisé
+- Pour extraire uniquement tokens_saved :
+  - `rtk curl -sS http://localhost:8787/stats | jq '.tokens.saved'`
 
 

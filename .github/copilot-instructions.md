@@ -46,14 +46,13 @@ Règles immédiates :
 
 La configuration et les recommandations d'utilisation du proxy Headroom ont été déplacées vers `.github/instructions/green.instructions.md` (section "Headroom Proxy").
 
-Important : lors de la récupération des statistiques Headroom, la sortie JSON doit être parsée avec l'outil `jk` avant tout affichage ou insertion dans les fichiers de rapport. Si `jk` n'est pas disponible, utiliser `jq` en fallback.
+Important : lors de la récupération des statistiques Headroom, la sortie JSON doit être parsée avec l'outil `jq` avant tout affichage ou insertion dans les fichiers de rapport.
 
-Exemple d'usage (préférentiel) :
+Exemple d'usage :
 
-- `rtk curl -sS http://localhost:8787/stats | jk`  # pretty-print / filtrage avec jk
-- fallback : `rtk curl -sS http://localhost:8787/stats | jq '.'`
+- `rtk curl -sS http://localhost:8787/stats | jq '.'`  # pretty-print / filtrage avec jq
 
-Le Copilot CLI doit automatiquement utiliser `jk` pour formater et extraire les champs pertinents (ex: tokens_saved, proxy_inbound) lorsqu'il met à jour `.github/history/YYYY-MM-DD.md`.
+Le Copilot CLI doit automatiquement utiliser `jq` pour formater et extraire les champs pertinents (ex: tokens.saved, proxy_inbound) lorsqu'il met à jour `.github/history/YYYY-MM-DD.md`.
 
 ## Knowledge base
 
