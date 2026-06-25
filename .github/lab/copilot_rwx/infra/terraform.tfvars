@@ -1,8 +1,0 @@
-resource_group_name = "rg-sp5-d-ybo-azu-ollama_test-txt"
-location            = "francecentral"
-vm_name             = "test-ollama"
-vm_size             = "Standard_D2pls_v6"
-admin_username      = "yves"
-ssh_public_key_path = "/home/yves/.ssh/yves@azure.pem.pub"
-git_repo            = "https://github.com/youpi-tralala/myownpersonaljesus.git"
-git_branch          = "main"

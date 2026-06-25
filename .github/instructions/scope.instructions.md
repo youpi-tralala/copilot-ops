@@ -35,7 +35,9 @@ Toutes sont en lecture seule ou sans effet de bord.
 | `ssh ... "docker info"`                              | Vérification connectivité code-vm |
 | `git diff`, `rtk diff`                               | Comparaison fichiers              |
 | `which`, `command -v`                                | Vérification présence d'un outil  |
-| `echo`, `cat /etc/os-release`                        | Informations système en lecture   |
+| `which`, `command -v`                                | Vérification présence d'un outil  |
+| `rtk wc -l`, `rtk wc -w`, `rtk wc -c`                | Comptage lignes/mots/caractères   |
+|     /|       |
 
 > Toute commande **écrivant, supprimant ou modifiant** un fichier ou une ressource requiert une validation selon la matrice ci-dessus.
 
@@ -60,7 +62,7 @@ Pour permettre au Copilot CLI de démarrer le proxy Headroom en début de sessio
 
 Comportement :
 
-- Au démarrage de session, Copilot vérifie la présence de `headroom` et peut lancer `headroom proxy --port 8787` si l'exécutable est disponible.
+- Au démarrage de session, Copilot vérifie la présence de `headroom` et doit lancer `headroom proxy --port 8787` si l'exécutable est disponible.
 - Copilot exportera les variables d'environnement suivantes pour les sessions locales :
   - `OPENAI_BASE_URL=http://localhost:8787/v1`
   - `ANTHROPIC_BASE_URL=http://localhost:8787`

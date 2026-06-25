@@ -29,3 +29,9 @@ Si la réponse n'y figure pas, le préciser explicitement avant de répondre.
 | Site |
 |---|
 | https://dev.to/ |
+
+## Sources Locales
+
+| Site |
+|---|
+| /home/yves/ops/my_git/obsidian_notes/*|

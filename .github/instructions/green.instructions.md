@@ -87,7 +87,7 @@ Notes : conserver ce fichier à jour avec `rtk gain --history` et la FAQ interne
 
 Headroom peut réduire considérablement la consommation de tokens pour les appels LLM. Recommandations :
 
-- Démarrer le proxy localement pour les environnements de développement : `headroom proxy --port 8787`.
+- Démarrer automatiquement à chaque début de session le proxy localement pour les environnements de développement : `headroom proxy --port 8787`.
 - Pointer les clients vers le proxy :
   - OpenAI-compatible clients : `export OPENAI_BASE_URL=http://localhost:8787/v1`
   - Anthropic/Claude : `export ANTHROPIC_BASE_URL=http://localhost:8787`
@@ -96,17 +96,58 @@ Headroom peut réduire considérablement la consommation de tokens pour les appe
 
 Intégration CI / services : injecter les variables d'environnement ci‑dessus dans les services (docker-compose, systemd unit, containers) pour forcer le routage via Headroom.
 
-Rapports : inclure la sortie de `/stats` dans les rapports quotidiens (`.github/history/YYYY-MM-DD.md`) sous la clé `headroom_stats`.
+Rapports : utiliser le template HISTORY_AUTO standard dans `.github/history/YYYY-MM-DD.md`.
 
-### Affichage human‑readable
+### Affichage human‑readable et consolidation
 
-- Le contenu inséré dans les fichiers `history` doit être lisible par un humain : ajouter un résumé en texte clair (tokens saved, demandes total, requêtes proxy) et conserver le JSON détaillé dans un fichier compagnon (`YYYY-MM-DD.headroom.json`).
-- Exemple de résumé à insérer (format libre mais clair) :
-  Headroom — tokens_saved: 123, requests_total: 10, proxy_inbound_total: 8 (updated: 2026-06-23T14:00:00Z)
+- Le fichier `.github/history/YYYY-MM-DD.md` consolide tout en un seul document au format :
+  - `### Green Stats` (efficacité, volumes, tokens, cas d'usage)
+  - `## Sujets abordé N` avec sources/actions/blocages/prochaines actions
+- Mise à jour automatique : toutes les 30 minutes
+- Format : sections markdown avec blocs de données parsées (lisibles)
+- Pas de fichiers compagnons séparés (`.headroom.json`, `.headroom.txt`) — tout consolidé dans le `.md`
+
+Template attendu :
+
+```markdown
+# Session YYYY-MM-DD
+
+---
+
+<!-- HISTORY_AUTO_START -->
+## Méta
+
+### Green Stats 
+- outil utilisés:
+- efficacite_estimee_pct:
+- total_number_of_sessions:
+- total_requetes:
+- total_tokens:
+- total_tokens_saved:
+- cas_usage_observes:
+- proxy_inbound_total:
+
+## Sujets abordé X
+
+### Contexte
+### Sources consultées (interne / externe)
+### Actions réalisées
+### Problèmes / Blocages
+### Prochaines actions recommandées
+
+## Sujets abordé Y
+
+### Contexte
+### Sources consultées (interne / externe)
+### Actions réalisées
+### Problèmes / Blocages
+### Prochaines actions recommandées
+<!-- HISTORY_AUTO_END -->
+```
 
 ### Parsing des stats
 
-- La sortie JSON de `/stats` doit être parsée avec `jq` pour formatage et extraction des champs avant insertion dans les rapports.
+- La sortie JSON de `/stats` doit être parsée avec `jq` pour formatage et extraction des champs avant insertion dans le rapport consolidé.
 
 Exemples :
 
@@ -117,16 +158,11 @@ Exemples :
 
 ### Mise à jour périodique (opérationnelle)
 
-- Un processus d'actualisation peut être lancé en arrière‑plan pendant une session pour :
-  - écrire le résumé human‑readable et le JSON détaillé dans `.github/history/` plusieurs fois par session (intervalle configurable, ex: 5 minutes),
-  - consigner chaque exécution dans `knowledge/headroom_updates.log`,
-  - enregistrer un état sommaire dans `.github/instructions/_generated_updates.md`.
-
-- Le script d'updater doit :
-  - vérifier la présence de `headroom` et `jq`,
-  - récupérer `/stats`, parser avec `jq`, écrire `YYYY-MM-DD.headroom.json` et `YYYY-MM-DD.headroom.txt` (résumé),
-  - ajouter une ligne horodatée dans `knowledge/headroom_updates.log`.
+- Un processus d'actualisation en arrière‑plan met à jour `.github/history/YYYY-MM-DD.md` toutes les 30 minutes (intervalle configurable).
+- Chaque mise à jour consolide :
+  - Green Stats (dérivées de stats parsées avec `jq`)
+  - Sujets abordés et actions
+- Chaque mise à jour est consignée dans `knowledge/headroom_updates.log` (horodatée).
+- Aucun fichier compagnon séparé (`.headroom.json`, `.headroom.txt`, `_generated_updates.md`) — tout dans le `.md` consolidé.
 
 - Toute exposition réseau (liaison non‑localhost) nécessite approbation explicite.
-
-

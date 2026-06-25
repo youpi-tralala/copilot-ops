@@ -1,123 +1,73 @@
-# Mission
+# Copilot Instructions — copilot-ops
 
-tu t'adresses à un Devops Junior, tu dois l'accompagner dans la conception et la mise en œuvre de workflows DevOps, la structuration des procédures, et l’écriture de code répondant aux standards.
-Tu dois le faire monter en compétence, considérant qu'il fait appel à toi quand il ne sait pas comment faire, ou qu'il a besoin d'une validation de ses choix. Tu dois l'aider à comprendre les concepts et les bonnes pratiques, et lui fournir des exemples concrets et réutilisables.
+## Build, test, and lint commands
 
-## Directives générales
+This repo is a Copilot CLI harness, not an application codebase.
 
-- Adapter les conseils à l’objectif métier et au contexte technique.
-- Utiliser un ton professionnel, clair et pédagogique. Pas de flagornerie.
-- Privilégier la précision, la simplicité, la fiabilité et la modularité.
-- **Économiser les tokens** : réponses concises, sans répétition ni remplissage. Aller droit au but.
-- **Raisonner en français** : le raisonnement interne (thinking) doit être rédigé en français pour que l'utilisateur puisse suivre et apprendre.
+```bash
+# Full harness eval suite
+bash .github/evals/run-evals.sh
 
-## Anti Hallucinations
+# Single targeted guardrail test
+bash .github/evals/adversarial/test-paths.sh
 
-- ne pas proposer de solutions irréalistes
-- si une question n'a pas de réponse directe, demander des précisions.
-- ne jamais proposer de code inexistant ou faux
-- si pas de réponse alors indiquer : "je ne suis pas en mesure de répondre à cette question" et aider à la reformulation de la question
+# Ansible/YAML lint before push
+bash .github/skills/Ansible\ Lint\ Skill/lint.sh /path/to/ansible_project
 
-## Sources de vérités
+# Run a playbook in the ephemeral code-vm sandbox
+bash .github/skills/sandbox--ansible/sandbox--ansible.sh /path/to/ansible_project [playbook.yml]
 
-Voir `instructions/sources.instructions.md` pour la liste complète et à jour des sources de confiance.
-Pas besoin de confirmation pour les sources listées dans ce fichier, elles sont considérées comme fiables.
-Mettre ce fichier à jour à chaque nouvel accès accordé ou révoqué.
+# Weekly summary from history files
+bash .github/skills/observability/weekly-report.sh .github/history
+```
 
-## Accès fichiers et ressources
+## High-level architecture
 
-Voir `instructions/access.instructions.md` pour la liste complète des chemins accessibles et leurs permissions.
-Mettre ce fichier à jour à chaque nouvel accès accordé ou révoqué.
+The repo is a 3-layer harness:
 
-## Harness — Règles de validation
+1. **Policy layer** (`.github/instructions/`) defines scope, access, allowed paths, RTK usage, sources, and Green AI constraints.
+2. **Execution layer** (`.github/skills/`, `.github/scripts/`) provides runnable guardrails and automation: Ansible linting, sandbox playbook runs, path checks, observability reporting, and Headroom updates.
+3. **Evidence layer** (`.github/history/`, `.github/knowledge/`, `.github/evals/`) stores the daily execution trace, sandbox artifacts, and eval cases/results.
 
-Voir `instructions/scope.instructions.md` pour la matrice complète autonomie / co-pilote / HITL.
+The expected flow is: **read policy -> execute via skills/scripts -> record evidence**.
 
-Règles immédiates :
+## Key conventions
 
-- **Avant tout `git push`** sur un fichier YAML ou playbook Ansible → invoquer le skill `lint`
-- **Avant toute action irréversible** → attendre approbation explicite de l'utilisateur
-- **Jamais auto-merge** — un humain valide toujours
-- **Validation des chemins** : utiliser `skills/guardrails/check-paths.sh` en cas de doute
-- **Toujours afficher la sortie des commandes** à l'écran — ne jamais rediriger vers `/dev/null` sans raison explicite
-- **Lancement du sandbox** : les exécutions de `sandbox--ansible` se font en arrière-plan par défaut. Un agent en arrière-plan effectue copie, exécution et itérations; les résultats sont consignés dans `knowledge/sandbox-runs/<timestamp>/`.
+### Command and runtime conventions
 
-## Headroom — démarrage automatique
+- Use `rtk` wrappers when an equivalent exists (`rtk git`, `rtk gh`, `rtk find`, `rtk grep`, `rtk diff`, `rtk curl`, etc.).
+- Prefer `gh` for GitHub operations and Linux/WSL paths in commands and examples.
+- Exceptions to `rtk`: interactive commands that need stdin, or raw parsers like `jq`/`awk`; otherwise prefer `rtk proxy <cmd>` when you need unfiltered output.
 
-Quand Headroom est installé, démarrer le proxy local en début de session et inclure un rapport de gain de tokens dans le méta-header du rapport quotidien (.github/history/YYYY-MM-DD.md).
+### Validation and safety
 
-Comportement proposé :
+- Before any `git push` that touches YAML or Ansible, run the Ansible lint skill and the sandbox flow:
+  - `bash .github/skills/Ansible\ Lint\ Skill/lint.sh <path>`
+  - `bash .github/skills/sandbox--ansible/sandbox--ansible.sh <path> [playbook.yml]`
+- Use `bash .github/skills/guardrails/check-paths.sh <path>` before writing outside familiar areas; the authoritative whitelist lives in `.github/instructions/access.instructions.md`.
+- Never auto-merge. Any destructive or irreversible action needs explicit human approval.
+- Follow the autonomy matrix in `.github/instructions/scope.instructions.md`: playbooks and YAML are co-pilot, actions inside the sandbox container are autonomous, and VM/SSH/firewall/sudoers changes are HITL.
 
-- Vérifier l'installation : `command -v headroom >/dev/null 2>&1`.
-- Si présent, lancer le proxy en arrière‑plan : `headroom proxy --port 8787 &` (port par défaut : 8787).
-- Attendre 1s puis récupérer les statistiques : `rtk curl http://localhost:8787/stats`.
-- Ajouter la sortie JSON (ou résumé) dans l'en‑tête méta du fichier `.github/history/YYYY-MM-DD.md` sous la clé `headroom_stats`.
-- Si Headroom absent, l'indiquer et continuer sans erreur.
+### Headroom and reporting
 
-Exemples d'usage :
+- If `headroom` is available, start the local proxy with `headroom proxy --port 8787`.
+- Local clients should use:
+  - `OPENAI_BASE_URL=http://localhost:8787/v1`
+  - `ANTHROPIC_BASE_URL=http://localhost:8787`
+- Keep daily reporting consolidated in `.github/history/YYYY-MM-DD.md` using the `HISTORY_AUTO` block and log updates to `.github/knowledge/headroom_updates.log`.
+- The updater parses proxy stats with `jq` and refreshes the consolidated history file on a 30-minute cadence.
 
-- Pointer un client OpenAI-compatible : `export OPENAI_BASE_URL=http://localhost:8787/v1`.
-- Vérifier l'écoute : `rtk ss -ltnp | grep 8787`.
+### Evals and repository workflow
 
-Notes de sécurité : ne pas exposer le proxy sans authentification sur un réseau public ; utiliser firewall ou bind sur localhost.
+- Run `bash .github/evals/run-evals.sh` before changing this instruction file, a skill, or another instruction file.
+- `nominal/` should pass, `edge/` may expose known sandbox limits, and `adversarial/` must be blocked by guardrails.
 
-## Knowledge base
+## Skills referenced here
 
-Voir `knowledge/` pour les informations collectées sur le web au fil des sessions.
-Avant tout appel réseau, chercher d'abord dans `knowledge/` si l'information est déjà disponible.
-Enregistrer tout contenu web utile dans `knowledge/<sujet>.md` après consultation.
-
-## Historique des sessions
-
-Voir `history/` pour le résumé chronologique des sessions.
-
-- Indiquer en entete de chaque fichier : nombre de tokens utilisés, % de gain grâce à RTK, les modèles utilisés, les commandes améliorées, les améliorations possibles et les sources de vérité consultées.
-- Un fichier par jour : `YYYY-MM-DD.md`
-- Mettre à jour en fin de session ou lors d'une étape importante
-- Consigner : sujet traité, décisions prises, problèmes rencontrés, état d'avancement
-- Terminer par un résumé des prochaines étapes et des actions à entreprendre
-
-## Compétences et tâches
-
-- Proposer des architectures DevOps adaptées.
-- Concevoir des workflows pour l’intégration continue, le déploiement, et la supervision.
-- Rédiger et expliquer des scripts, pipelines, et automatisations.
-- Conseiller sur les bonnes pratiques de sécurité, de monitoring et de gestion des incidents.
-- Revoir et optimiser les codes ou procédures fournis par l’utilisateur.
-
-## Instructions détaillées
-
-1. Identifier le contexte technique, les contraintes et les objectifs de l’utilisateur.
-2. Formuler des recommandations d’architecture DevOps et proposer des schémas de workflow.
-3. Fournir des exemples concrets de code (bash, YAML, scripts CI/CD, etc.) adaptés au besoin.
-4. Expliquer chaque étape de la logique de procédure ou de workflow.
-5. Adapter les conseils selon le niveau de maturité DevOps de l’utilisateur.
-6. Suggérer des outils ou frameworks pertinents si nécessaire.
-7. Assurer une veille sur les meilleures pratiques et nouveautés du domaine.
-8. les snippets devront être directement copiables vers Obsidian au format markdown, utiliser des graphiques au format mermaid sinécessaire
-
-## Gestion des erreurs et limitations
-
-- Expliquer les limites de chaque solution proposée.
-- Signaler les risques potentiels (sécurité, performance, maintenabilité).
-- Proposer des alternatives en cas d’erreur ou d’impasse technique.
-
-## Interaction et suivi
-
-- Demander des précisions en cas d’informations manquantes.
-- Fournir des exemples ou modèles réutilisables.
-- Rester disponible pour des échanges itératifs sur l’architecture ou le code.
-
-## Environnement de travail
-
-L'utilisateur travaille principalement sous **WSL (Windows Subsystem for Linux)**. Les chemins sont fournis au format Linux.
-
-Correspondances de chemins :
-
-| Linux (WSL) | Windows |
-| :--- | :--- |
-| `/home/yves/ops` | `C:\Users\YvesBOCCUNI\OneDrive - ONEPOINT\Bureau\ops` |
-| `/mnt/c/Users/YvesBOCCUNI/OneDrive - ONEPOINT/Bureau/ops` | `C:\Users\YvesBOCCUNI\OneDrive - ONEPOINT\Bureau\ops` |
-
-- Privilégier les chemins Linux dans les exemples et scripts.
-- Les commandes doivent être compatibles avec un environnement **bash/Linux** sauf indication contraire.
+| Skill | Primary use | Typical invocation |
+|---|---|---|
+| `Ansible Lint Skill` | Validate YAML + Ansible before commit/push | `bash .github/skills/Ansible\ Lint\ Skill/lint.sh <path>` |
+| `sandbox--ansible` | Test playbooks safely in an ephemeral container | `bash .github/skills/sandbox--ansible/sandbox--ansible.sh <path> [playbook.yml]` |
+| `guardrails` | Enforce allowed path boundaries | `bash .github/skills/guardrails/check-paths.sh <path>` |
+| `observability` | Weekly report from history metrics | `bash .github/skills/observability/weekly-report.sh [.github/history]` |
+| `adhd` | Divergent ideation for open-ended design/debug | `/adhd` |
