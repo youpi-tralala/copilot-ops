@@ -1,0 +1,11 @@
+[Unit]
+Description=Copilot — mise à jour automatique history/knowledge/plan.md
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /home/yves/ops/my_git/copilot-ops/.github/skills/headroom_updater.sh
+StandardOutput=journal
+StandardError=journal
+Environment=HOME=/home/yves
+Environment=PATH=/home/yves/.local/bin:/usr/local/bin:/usr/bin:/bin

@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [instructions, copilot]
+status: active
+project: copilot-ops
+type: instructions
+---
+
 # Copilot Instructions — copilot-ops
 
 ## Build, test, and lint commands
@@ -19,6 +27,18 @@ bash .github/skills/sandbox--ansible/sandbox--ansible.sh /path/to/ansible_projec
 
 # Weekly summary from history files
 bash .github/skills/observability/weekly-report.sh .github/history
+
+# Validate frontmatter on all notes (or one file path)
+bash .github/scripts/validate-frontmatter.sh [path]
+
+# Mise à jour manuelle immédiate (history + knowledge + plan.md + commit+push)
+bash .github/skills/headroom_updater.sh
+
+# Hook de fin de session (frontmatter check + update final)
+bash .github/scripts/end-session.sh
+
+# Installer le timer auto (à faire une seule fois par machine WSL)
+bash .github/scripts/install-updater.sh
 ```
 
 ## High-level architecture
@@ -38,6 +58,8 @@ The expected flow is: **read policy -> execute via skills/scripts -> record evid
 - Use `rtk` wrappers when an equivalent exists (`rtk git`, `rtk gh`, `rtk find`, `rtk grep`, `rtk diff`, `rtk curl`, etc.).
 - Prefer `gh` for GitHub operations and Linux/WSL paths in commands and examples.
 - Exceptions to `rtk`: interactive commands that need stdin, or raw parsers like `jq`/`awk`; otherwise prefer `rtk proxy <cmd>` when you need unfiltered output.
+- Start sessions through `./bootstrap-copilot.sh --ack` so `.github/copilot-instructions.md` is read first.
+- Add `--with-headroom` to auto-start the proxy: `./bootstrap-copilot.sh --ack --with-headroom`.
 
 ### Validation and safety
 
@@ -50,12 +72,23 @@ The expected flow is: **read policy -> execute via skills/scripts -> record evid
 
 ### Headroom and reporting
 
-- If `headroom` is available, start the local proxy with `headroom proxy --port 8787`.
+- If `headroom` is available, start the local proxy with `headroom proxy --port 8787` (or via `./bootstrap-copilot.sh --ack --with-headroom`).
 - Local clients should use:
   - `OPENAI_BASE_URL=http://localhost:8787/v1`
   - `ANTHROPIC_BASE_URL=http://localhost:8787`
 - Keep daily reporting consolidated in `.github/history/YYYY-MM-DD.md` using the `HISTORY_AUTO` block and log updates to `.github/knowledge/headroom_updates.log`.
-- The updater parses proxy stats with `jq` and refreshes the consolidated history file on a 30-minute cadence.
+- The updater parses proxy stats with `jq` and refreshes the consolidated history file on a 30-minute cadence: `bash .github/skills/headroom_updater.sh`.
+- Sync `.github/plan.md` to session state: `bash .github/scripts/sync-plan.sh`.
+
+### Vault memory conventions (Obsidian-first)
+
+- Follow the frontmatter contract in `[[.github/knowledge/vault-schema]]`.
+- Keep canonical indexes in `[[.github/knowledge/vault-index]]` and `_manifest.json`.
+- Use wiki-links (`[[...]]`) and maintain backlinks to at least one hub note per active note.
+- Every markdown file requires these frontmatter fields: `date`, `tags`, `status`, `project`, `type`.
+  - `status` ∈ `active | draft | archived`
+  - `type` ∈ `instructions | connaissance | ressource | journal | rapport | runbook`
+- Validate frontmatter: `bash .github/scripts/validate-frontmatter.sh [path]`
 
 ### Evals and repository workflow
 
@@ -71,3 +104,11 @@ The expected flow is: **read policy -> execute via skills/scripts -> record evid
 | `guardrails` | Enforce allowed path boundaries | `bash .github/skills/guardrails/check-paths.sh <path>` |
 | `observability` | Weekly report from history metrics | `bash .github/skills/observability/weekly-report.sh [.github/history]` |
 | `adhd` | Divergent ideation for open-ended design/debug | `/adhd` |
+
+## Integrated references
+
+- `.github/evals/README.md` for eval workflow and pre-change gate.
+- `.github/instructions/scope.instructions.md` for autonomy/HITL boundaries.
+- `.github/instructions/access.instructions.md` for writable/forbidden path policy.
+- `.github/instructions/rtk.instructions.md` for mandatory command wrapping and exceptions.
+- `.github/instructions/green.instructions.md` for Headroom routing and consolidated history reporting.
