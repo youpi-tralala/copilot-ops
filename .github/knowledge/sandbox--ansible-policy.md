@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [knowledge, ressource]
+status: active
+project: copilot-ops
+type: connaissance
+---
+
 # Sandbox--ansible — Policy et log des droits
 
 Consulté/Créé : 2026-06-19

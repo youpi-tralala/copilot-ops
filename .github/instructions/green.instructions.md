@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [instructions, politique]
+status: active
+project: copilot-ops
+type: instructions
+---
+
 # Bonnes pratiques Green AI
 
 Objectif : réduire l'empreinte environnementale des développements et des interactions IA (tokens, réseau, compute, choix de modèles). S'applique au travail local, aux playbooks, CI/CD et aux agents.
@@ -103,7 +111,7 @@ Rapports : utiliser le template HISTORY_AUTO standard dans `.github/history/YYYY
 - Le fichier `.github/history/YYYY-MM-DD.md` consolide tout en un seul document au format :
   - `### Green Stats` (efficacité, volumes, tokens, cas d'usage)
   - `## Sujets abordé N` avec sources/actions/blocages/prochaines actions
-- Mise à jour automatique : toutes les 30 minutes
+- Mise à jour automatique : toutes les  heures
 - Format : sections markdown avec blocs de données parsées (lisibles)
 - Pas de fichiers compagnons séparés (`.headroom.json`, `.headroom.txt`) — tout consolidé dans le `.md`
 

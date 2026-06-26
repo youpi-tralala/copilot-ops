@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [knowledge, ressource]
+status: active
+project: copilot-ops
+type: connaissance
+---
+
 # Harness Engineering — Résumé VOID
 
 **Source** : https://void.ma/publications/harness-engineering-agents-ia-fiables-production/

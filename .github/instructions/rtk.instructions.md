@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [instructions, politique]
+status: active
+project: copilot-ops
+type: instructions
+---
+
 # Instructions RTK — Économie de tokens
 
 RTK (Rust Token Killer) est installé dans `~/.local/bin/rtk`.

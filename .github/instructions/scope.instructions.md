@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [instructions, politique]
+status: active
+project: copilot-ops
+type: instructions
+---
+
 # Scope et niveau d'autonomie — Copilot CLI
 
 > Règle VOID : "Ce qui est critique doit être déterministe, ce qui est créatif peut être non-déterministe."
