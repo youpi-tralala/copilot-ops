@@ -3,6 +3,11 @@ name: adhd
 description: >
    Idéation divergente parallèle pour agents de code. Génère N branches isolées sous différents cadres cognitifs (régulateur, biologie, speedrunner, enfant de 10 ans, budget $0), les évalue, les regroupe, écarte les impasses et approfondit les meilleures pistes. À utiliser avec /adhd, "mode ADHD", pour brainstormer des intentions ou la conception ouverte (architecture, nommage, surface API/SDK) et pour les décisions de debug floues. Ne pas utiliser pour la syntaxe, les recherches simples, les bugs à cause connue ou les formulations fermées ("rapide", "standard", "canonique", "manuel"). Le pré‑contrôle complet est décrit dans le corps du skill.
 license: MIT
+date: 2026-06-25
+tags: [skills, instructions]
+status: active
+project: copilot-ops
+type: instructions
 ---
 
 # ADHD

@@ -1,4 +1,12 @@
 ---
+date: 2026-06-25
+tags: [skills, instructions]
+status: active
+project: copilot-ops
+type: instructions
+---
+
+---
 name: sandbox--ansible
 description: >
   Teste un playbook Ansible dans un container Docker éphémère sur code-vm,

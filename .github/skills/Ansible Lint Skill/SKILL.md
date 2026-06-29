@@ -5,6 +5,11 @@ description: >
   sur code-vm avant tout commit ou push. Invoquer avec /lint ou avant tout git push
   sur un fichier YAML ou playbook Ansible.
 allowed-tools: shell
+date: 2026-06-25
+tags: [skills, instructions]
+status: active
+project: copilot-ops
+type: instructions
 ---
 # Ansible Lint Skill
 

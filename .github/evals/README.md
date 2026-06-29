@@ -1,3 +1,11 @@
+---
+date: 2026-06-25
+tags: [evals, ressource]
+status: active
+project: copilot-ops
+type: ressource
+---
+
 # Evals — Harness Copilot CLI
 
 Valide que le harness fonctionne correctement avant toute montée de version.

@@ -16,7 +16,7 @@ This repo is a Copilot CLI harness, not an application codebase.
 # Full harness eval suite
 bash .github/evals/run-evals.sh
 
-# Single targeted guardrail test
+# Single targeted guardrail test (one-test run)
 bash .github/evals/adversarial/test-paths.sh
 
 # Ansible/YAML lint before push
@@ -31,6 +31,9 @@ bash .github/skills/observability/weekly-report.sh .github/history
 # Validate frontmatter on all notes (or one file path)
 bash .github/scripts/validate-frontmatter.sh [path]
 
+# Validate only this instruction file
+bash .github/scripts/validate-frontmatter.sh .github/copilot-instructions.md
+
 # Mise à jour manuelle immédiate (history + knowledge + plan.md + commit+push)
 bash .github/skills/headroom_updater.sh
 
@@ -43,11 +46,12 @@ bash .github/scripts/install-updater.sh
 
 ## High-level architecture
 
-The repo is a 3-layer harness:
+The repo is a 4-part harness:
 
-1. **Policy layer** (`.github/instructions/`) defines scope, access, allowed paths, RTK usage, sources, and Green AI constraints.
-2. **Execution layer** (`.github/skills/`, `.github/scripts/`) provides runnable guardrails and automation: Ansible linting, sandbox playbook runs, path checks, observability reporting, and Headroom updates.
-3. **Evidence layer** (`.github/history/`, `.github/knowledge/`, `.github/evals/`) stores the daily execution trace, sandbox artifacts, and eval cases/results.
+1. **Bootstrap layer** (`bootstrap-copilot.sh`) prints the instructions checksum/content first, enforces `--ack`, and auto-starts Headroom on `localhost:8787` when available.
+2. **Policy layer** (`.github/instructions/`) defines autonomy level, allowed paths, mandatory RTK wrappers, and source-of-truth policy.
+3. **Execution layer** (`.github/skills/`, `.github/scripts/`, `.github/systemd/`) provides runnable guardrails and automation: Ansible linting, sandbox playbook runs, path checks, periodic Headroom updater, end-session hook, and user timer install.
+4. **Evidence layer** (`.github/history/`, `.github/knowledge/`, `.github/evals/`) stores consolidated daily reports, updater logs, and eval scenarios/results.
 
 The expected flow is: **read policy -> execute via skills/scripts -> record evidence**.
 
@@ -58,27 +62,29 @@ The expected flow is: **read policy -> execute via skills/scripts -> record evid
 - Use `rtk` wrappers when an equivalent exists (`rtk git`, `rtk gh`, `rtk find`, `rtk grep`, `rtk diff`, `rtk curl`, etc.).
 - Prefer `gh` for GitHub operations and Linux/WSL paths in commands and examples.
 - Exceptions to `rtk`: interactive commands that need stdin, or raw parsers like `jq`/`awk`; otherwise prefer `rtk proxy <cmd>` when you need unfiltered output.
-- Start sessions through `./bootstrap-copilot.sh --ack` so `.github/copilot-instructions.md` is read first.
-- Add `--with-headroom` to auto-start the proxy: `./bootstrap-copilot.sh --ack --with-headroom`.
+- Start sessions through `./bootstrap-copilot.sh --ack` so `.github/copilot-instructions.md` is always read first.
+- Headroom now starts by default in bootstrap when available; use `--no-headroom` to opt out for a session.
 
 ### Validation and safety
 
 - Before any `git push` that touches YAML or Ansible, run the Ansible lint skill and the sandbox flow:
   - `bash .github/skills/Ansible\ Lint\ Skill/lint.sh <path>`
   - `bash .github/skills/sandbox--ansible/sandbox--ansible.sh <path> [playbook.yml]`
-- Use `bash .github/skills/guardrails/check-paths.sh <path>` before writing outside familiar areas; the authoritative whitelist lives in `.github/instructions/access.instructions.md`.
+- Use `bash .github/skills/guardrails/check-paths.sh <path>` before writing outside familiar areas.
+- Keep guardrail whitelist in `check-paths.sh` aligned with `.github/instructions/access.instructions.md` (both are used as control points).
 - Never auto-merge. Any destructive or irreversible action needs explicit human approval.
 - Follow the autonomy matrix in `.github/instructions/scope.instructions.md`: playbooks and YAML are co-pilot, actions inside the sandbox container are autonomous, and VM/SSH/firewall/sudoers changes are HITL.
 
 ### Headroom and reporting
 
-- If `headroom` is available, start the local proxy with `headroom proxy --port 8787` (or via `./bootstrap-copilot.sh --ack --with-headroom`).
+- If `headroom` is available, bootstrap starts `headroom proxy --port 8787` automatically (unless `--no-headroom` is passed).
 - Local clients should use:
   - `OPENAI_BASE_URL=http://localhost:8787/v1`
   - `ANTHROPIC_BASE_URL=http://localhost:8787`
 - Keep daily reporting consolidated in `.github/history/YYYY-MM-DD.md` using the `HISTORY_AUTO` block and log updates to `.github/knowledge/headroom_updates.log`.
 - The updater parses proxy stats with `jq` and refreshes the consolidated history file on a 30-minute cadence: `bash .github/skills/headroom_updater.sh`.
 - Sync `.github/plan.md` to session state: `bash .github/scripts/sync-plan.sh`.
+- `headroom_updater.sh`, `end-session.sh`, and `sync-plan.sh` assume the repository path `/home/yves/ops/my_git/copilot-ops`.
 
 ### Vault memory conventions (Obsidian-first)
 
@@ -93,7 +99,7 @@ The expected flow is: **read policy -> execute via skills/scripts -> record evid
 ### Evals and repository workflow
 
 - Run `bash .github/evals/run-evals.sh` before changing this instruction file, a skill, or another instruction file.
-- `nominal/` should pass, `edge/` may expose known sandbox limits, and `adversarial/` must be blocked by guardrails.
+- `adversarial/` must be blocked by guardrails; `nominal/` and `edge/` are sandbox-dependent and are skipped when `code-vm` is unreachable.
 
 ## Skills referenced here
 

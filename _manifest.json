@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "project": "copilot-ops",
+  "export_format": "markdown+yaml-frontmatter",
+  "generated_at": "2026-06-25",
+  "indexes": [
+    ".github/knowledge/vault-index.md",
+    ".github/knowledge/vault-schema.md",
+    ".github/copilot-instructions.md"
+  ],
+  "bootstrap": {
+    "script": "./bootstrap-copilot.sh",
+    "read_first": ".github/copilot-instructions.md"
+  },
+  "migration": {
+    "mode": "two-phases",
+    "target": "all_markdown_except_generated_archives",
+    "exclude": [
+      ".github/knowledge/sandbox-runs/**",
+      "session-state/**"
+    ]
+  },
+  "frontmatter_required_fields": [
+    "date",
+    "tags",
+    "status",
+    "project",
+    "type"
+  ],
+  "taxonomy": {
+    "status": [
+      "active",
+      "draft",
+      "archived"
+    ],
+    "type": [
+      "instructions",
+      "connaissance",
+      "ressource",
+      "journal",
+      "rapport",
+      "runbook"
+    ]
+  }
+}

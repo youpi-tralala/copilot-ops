@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "evals/README.md",
+                "file": "knowledge/vault-schema.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "vault-schema"
             }
           }
         ]
@@ -184,5 +184,18 @@
     }
   },
   "active": "942175aa097bee7e",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "knowledge/vault-index.md",
+    "knowledge/sandbox--ansible-policy.md",
+    "knowledge/harness-engineering-void.md",
+    "instructions/scope.instructions.md",
+    "instructions/green.instructions.md",
+    "instructions/access.instructions.md",
+    "plan.md",
+    "copilot-instructions.md",
+    "history/2026-06-23.md",
+    "evals/README.md",
+    "scripts/validate-frontmatter.sh",
+    "knowledge/vault-schema.md"
+  ]
 }
