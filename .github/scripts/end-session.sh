@@ -5,7 +5,7 @@
 set -euo pipefail
 
 REPO_ROOT="/home/yves/ops/my_git/copilot-ops"
-UPDATER="${REPO_ROOT}/.github/skills/headroom_updater.sh"
+UPDATER="${REPO_ROOT}/.github/scripts/headroom_updater.sh"
 
 echo "=== FIN DE SESSION Copilot ==="
 

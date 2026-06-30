@@ -27,7 +27,7 @@ echo "✓ Timer activé et démarré"
 
 # Premier run immédiat
 echo "Lancement d'un premier update..."
-bash "${REPO_ROOT}/.github/skills/headroom_updater.sh" && echo "✓ Premier update OK"
+bash "${REPO_ROOT}/.github/scripts/headroom_updater.sh" && echo "✓ Premier update OK"
 
 echo ""
 echo "=== Timer installé ==="

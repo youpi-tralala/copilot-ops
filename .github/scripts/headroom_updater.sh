@@ -9,7 +9,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 HISTORY_DIR="$REPO_DIR/.github/history"
 KNOWLEDGE_DIR="$REPO_DIR/.github/knowledge"
-INTERVAL="${HEADROOM_UPDATE_INTERVAL:-1800}"
+INTERVAL="${HEADROOM_UPDATE_INTERVAL:-3600}"
 PROXY_URL="${HEADROOM_PROXY_URL:-http://localhost:8787}"
 LOG_FILE="$KNOWLEDGE_DIR/headroom_updates.log"
 RUN_ONCE="${HEADROOM_UPDATER_ONCE:-0}"
@@ -175,11 +175,11 @@ while true; do
     fi
   fi
 
-  TOKENS_SAVED="$(printf '%s' "$PARSED_STATS" | jq -r '.tokens.saved // 0')"
-  REQ_TOTAL="$(printf '%s' "$PARSED_STATS" | jq -r '.requests.total // 0')"
-  PROXY_INBOUND="$(printf '%s' "$PARSED_STATS" | jq -r '.proxy_inbound.total // 0')"
-  EFFICIENCY_PCT="$(printf '%s' "$PARSED_STATS" | jq -r '.tokens.savings_percent // .summary.cost.savings_pct // 0')"
-  USE_CASES="$(printf '%s' "$PARSED_STATS" | jq -r '((.proxy_inbound.by_path // {}) | keys) as $k | if ($k|length) > 0 then ($k|join(", ")) else "non observe" end')"
+  TOKENS_SAVED="$(printf '%s' "$PARSED_STATS" | jq -r '.tokens.saved // .tokens_saved // 0')"
+  REQ_TOTAL="$(printf '%s' "$PARSED_STATS" | jq -r '.requests.total // .requests // .total_requests // 0')"
+  PROXY_INBOUND="$(printf '%s' "$PARSED_STATS" | jq -r '.proxy_inbound.total // .proxy_inbound_total // .inbound_total // 0')"
+  EFFICIENCY_PCT="$(printf '%s' "$PARSED_STATS" | jq -r '.tokens.savings_percent // .summary.cost.savings_pct // .efficiency_pct // "n/a"')"
+  USE_CASES="$(printf '%s' "$PARSED_STATS" | jq -r '((.proxy_inbound.by_path // .requests.by_path // {}) | keys) as $k | if ($k|length) > 0 then ($k|join(", ")) else "non observe" end')"
   TOTAL_SESSIONS="$(find "$HISTORY_DIR" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')"
   TOTAL_TOKENS="$(printf '%s' "$PARSED_STATS" | jq -r '.tokens.input // 0')"
 

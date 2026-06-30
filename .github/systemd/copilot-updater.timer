@@ -1,9 +1,9 @@
 [Unit]
-Description=Copilot — timer auto-update (toutes les 30 min)
+Description=Copilot — timer auto-update (toutes les heures)
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=30min
+OnBootSec=10min
+OnUnitActiveSec=1h
 Unit=copilot-updater.service
 Persistent=true
 
